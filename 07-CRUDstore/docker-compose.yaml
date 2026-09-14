@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: store_db
+    restart: always
+    environment:
+      POSTGRES_DB: store_db
+      POSTGRES_USER: store_user
+      POSTGRES_PASSWORD: store_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U store_user -d store_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Application Service
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: creatorstore_app
+#    restart: always
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/creatorstore_db
+#      SPRING_DATASOURCE_USERNAME: store_user
+#      SPRING_DATASOURCE_PASSWORD: store_password
+#      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+#      SPRING_JPA_SHOW_SQL: "true"
+#      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+
+volumes:
+  postgres_data:
