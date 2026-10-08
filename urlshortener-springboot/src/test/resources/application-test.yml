@@ -1,0 +1,14 @@
+# Used automatically by any @SpringBootTest annotated with
+# @ActiveProfiles("test"). Testcontainers (see UrlShortenerApplicationTests)
+# overrides datasource/redis properties at runtime via @DynamicPropertySource
+# / @ServiceConnection, so most of this just needs to exist and be sane.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    dev.singularity.urlshortener: DEBUG

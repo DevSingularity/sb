@@ -1,0 +1,62 @@
+services:
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: url_shortner_pg
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: url
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d url"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: url_shortner_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # The Spring Boot app itself. Comment this service out (and just run
+  # `docker compose up postgres-db redis-cache`) if you'd rather run the
+  # app from your IDE for faster edit/debug cycles.
+  app:
+    build: .
+    container_name: url_shortner_app
+    restart: on-failure
+    ports:
+      - "9000:9000"
+    environment:
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_NAME: url
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      REDIS_HOST: redis-cache
+      REDIS_PORT: 6379
+      APP_BASE_URL: http://localhost:9000
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
